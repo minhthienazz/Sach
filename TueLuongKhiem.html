@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tuệ Lương Khiêm - Trang cá nhân & Kinh hay</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary: #a66b2b;
+      --primary-dark: #6a3d1f;
+      --accent: #e5b955;
+      --bg: #fdf5e4;
+      --text: #241712;
+      --muted: #7c6b60;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(243,220,167,0.36), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(187,140,90,0.35), transparent 45%),
+                  linear-gradient(180deg, #fdf5e4 0%, #f9f0df 35%, #f4e7d4 100%);
+      min-height: 100vh;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 16px 14px 10px;
+      text-align: center;
+      color: #fff8e7;
+      background: linear-gradient(135deg, #3b2a26, #8b5b2f);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: #f7e7c0;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .tab-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.6);
+      padding: 8px 18px;
+      font-size: 0.92rem;
+      background: rgba(0,0,0,0.1);
+      color: #fff9ec;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: background 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      color: #3b2414;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+      transform: translateY(-1px);
+    }
+
+    main {
+      flex: 1;
+      padding: 10px 8px 18px;
+    }
+
+    .frame-wrapper {
+      max-width: 1240px;
+      margin: 0 auto;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+      border: 1px solid rgba(166,107,43,0.55);
+      background: #000;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100vh - 150px);
+      border: none;
+      display: none;
+    }
+
+    iframe.active {
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px 8px 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 768px) {
+      iframe {
+        height: calc(100vh - 170px);
+      }
+      header h1 { font-size: 1.35rem; }
+      .tab-btn { font-size: 0.85rem; padding: 7px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tuệ Lương Khiêm &mdash; Nguyễn Minh Thiện</h1>
+    <p>Chọn xem <strong>Trang cá nhân</strong> hoặc <strong>Trang Kinh hay</strong> bên dưới.</p>
+    <div class="tabs">
+      <button class="tab-btn active" data-target="personal">Trang cá nhân</button>
+      <button class="tab-btn" data-target="sutra">Trang Kinh</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="frame-wrapper">
+      <iframe id="frame-personal" class="active" src="tue-luong-khiem-v4.html" title="Trang cá nhân Tuệ Lương Khiêm"></iframe>
+      <iframe id="frame-sutra" src="kinhhay.html" title="Trang Kinh hay"></iframe>
+    </div>
+  </main>
+
+  <script>
+    const buttons = document.querySelectorAll('.tab-btn');
+    const framePersonal = document.getElementById('frame-personal');
+    const frameSutra = document.getElementById('frame-sutra');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.target;
+        if (target === 'personal') {
+          framePersonal.classList.add('active');
+          frameSutra.classList.remove('active');
+        } else {
+          framePersonal.classList.remove('active');
+          frameSutra.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
