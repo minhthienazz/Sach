@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Điệp Năm Giới</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Điệp Năm Giới">
+    <meta name="theme-color" content="#0a0705">
+    <meta name="description" content="Điệp Năm Giới Quý Báu - Phật Pháp">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0705;
+            --paper: #f4efe6; /* Giấy kem mịn */
+            --text-main: #2b1f16;
+            --gold-base: #d4af37;
+            --gold-light: #ffeba1;
+            --gold-dark: #b8860b;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #24150b 0%, var(--bg-deep) 100%);
+            font-family: 'Lora', serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Cấm cuộn toàn trang */
+            color: #fdfbf7;
+        }
+
+        .book-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- TRANG BÌA (3D & ÁNH KIM) --- */
+        .cover {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, #382211 0%, #0a0502 100%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4rem 1.5rem;
+            transition: opacity 0.8s ease-in-out, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .cover.hidden-anim {
+            opacity: 0;
+            transform: scale(1.15) translateY(-20px);
+            pointer-events: none;
+            filter: blur(10px);
+        }
+
+        .shiny-gold-text {
+            background: linear-gradient(
+                120deg, var(--gold-dark) 0%, var(--gold-base) 20%, #ffffff 45%, var(--gold-base) 60%, var(--gold-dark) 100%
+            );
+            background-size: 250% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 4s linear infinite;
+            font-family: 'Playfair Display', serif;
+            filter: drop-shadow(0 6px 8px rgba(0,0,0,0.9));
+        }
+
+        @keyframes shine { to { background-position: 250% center; } }
+
+        .dharma-wheel {
+            animation: breathe 5s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(212,175,55,0.4)); }
+            50% { transform: scale(1.04); filter: drop-shadow(0 0 30px rgba(255,215,0,0.7)); }
+        }
+
+        /* Nút 3D Mở */
+        .btn-3d-gold {
+            background: linear-gradient(145deg, #ffe58f, #d4af37, #997000);
+            border: 2px solid #ffeba1;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.7), inset 0 6px 8px rgba(255, 255, 255, 0.7), inset 0 -6px 8px rgba(100, 60, 0, 0.5);
+            color: #3b2311;
+            font-weight: 900;
+            text-transform: uppercase;
+            border-radius: 50px;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            position: relative;
+            overflow: hidden;
+            outline: none;
+        }
+        .btn-3d-gold::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+            transform: skewX(-25deg); animation: btnShine 3.5s infinite;
+        }
+        @keyframes btnShine { 0% { left: -100%; } 20%, 100% { left: 200%; } }
+        .btn-3d-gold:active {
+            transform: translateY(6px) scale(0.95);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.9), inset 0 4px 6px rgba(255, 255, 255, 0.6), inset 0 -4px 6px rgba(100, 60, 0, 0.4);
+        }
+
+        /* --- CẤU TRÚC LẬT TRANG SÁCH --- */
+        .book-viewport {
+            width: 100%;
+            max-width: 650px;
+            height: 100vh;
+            position: relative;
+            overflow: hidden; /* Cắt phần trang bị tràn */
+            background-color: var(--paper);
+            box-shadow: 0 0 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,175,55,0.13);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .book-viewport.visible {
+            opacity: 1; transform: translateY(0);
+        }
+
+        /* Băng chuyền chứa các trang */
+        .pages-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); /* Hiệu ứng lật trượt mượt mà */
+            will-change: transform;
+        }
+
+        .page {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 0;
+            box-sizing: border-box;
+            position: relative;
+            background-color: var(--paper);
+        }
+        /* ẢNH NỀN dùng thẻ <img> thực sự */
+        .page-bg-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+        /* Lớp cream mờ phủ lên ảnh để nổi chữ */
+        .page-cream-wash {
+            position: absolute;
+            inset: 0;
+            background: rgba(244, 239, 230, 0.60);
+            z-index: 1;
+            pointer-events: none;
+        }
+        /* Nội dung trang luôn nổi trên ảnh */
+        .page-inner {
+            position: relative;
+            z-index: 2;
+            padding: 3.5rem 1.5rem 12rem 1.5rem;
+        }
+        .page::-webkit-scrollbar { width: 0px; }
+
+        .chapter-title {
+            text-align: center;
+            font-size: 1.85rem;
+            font-weight: 800;
+            margin: 1rem 0 2rem 0;
+            padding: 1rem;
+            transition: all 0.5s ease;
+        }
+
+        /* --- ĐOẠN VĂN --- */
+        .read-paragraph {
+            margin-bottom: 1.2rem;
+            line-height: 1.8;
+            font-size: 1.2rem;
+            padding: 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid transparent;
+            color: var(--text-main);
+        }
+
+        /* --- HIỆU ỨNG GIỌT NƯỚC (WATER DROP - iOS) --- */
+        .book-viewport.is-reading .read-paragraph,
+        .book-viewport.is-reading .chapter-title {
+            opacity: 0.25; 
+            filter: blur(1px); 
+            transform: scale(0.98);
+        }
+
+        .book-viewport.is-reading .read-paragraph.active,
+        .book-viewport.is-reading .chapter-title.active {
+            opacity: 1;
+            filter: blur(0);
+            transform: scale(1.02);
+            background: rgba(255, 252, 240, 0.93);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.30);
+            border-bottom: 1px solid rgba(255,255,255,0.4);
+            box-shadow:
+                0 10px 28px rgba(0,0,0,0.10),
+                0 0 0 3px rgba(212,175,55,0.10),
+                inset 0 0 18px rgba(255,255,255,0.5);
+            color: #180e06;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        /* --- NÚT ĐIỀU HƯỚNG TRANG (L/R) --- */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #5c4028;
+            font-size: 1.2rem;
+            z-index: 80;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover { background: rgba(255,248,220,0.65); border-color: rgba(212,175,55,0.5); color: #7a4e00; transform: translateY(-50%) scale(1.12); box-shadow: 0 4px 14px rgba(180,130,0,0.2); }
+        .nav-btn.left { left: 10px; }
+        .nav-btn.right { right: 10px; }
+        .nav-btn.disabled { opacity: 0; pointer-events: none; }
+
+        /* Số trang */
+        .page-indicator {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Lora', serif;
+            font-size: 0.76rem;
+            color: rgba(92, 64, 40, 0.8);
+            letter-spacing: 3px;
+            z-index: 80;
+            background: rgba(244,239,230,0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 3px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(212,175,55,0.28);
+            white-space: nowrap;
+            text-transform: uppercase;
+        }
+
+        /* --- THANH ĐIỀU KHIỂN AUDIO --- */
+        .glass-player {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            width: 88%;
+            max-width: 380px;
+            background: rgba(15, 10, 6, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 999px;
+            padding: 0.6rem 1.2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.1);
+            z-index: 100;
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .glass-player.visible { transform: translateX(-50%) translateY(0); }
+
+        .play-btn-3d {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            background: linear-gradient(145deg, #ffe58f, #d4af37, #997000);
+            border: 2px solid #ffeba1;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.6), inset 0 6px 8px rgba(255, 255, 255, 0.7), inset 0 -6px 8px rgba(100, 60, 0, 0.5);
+            color: #3b2311;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            outline: none;
+        }
+        .play-btn-3d:active {
+            transform: scale(0.92) translateY(4px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.8), inset 0 4px 6px rgba(255, 255, 255, 0.6), inset 0 -4px 6px rgba(100, 60, 0, 0.4);
+        }
+
+        .audio-wave { display: flex; align-items: center; gap: 3px; height: 20px; }
+        .audio-wave span {
+            display: block; width: 3px; background-color: var(--gold-light); border-radius: 3px;
+            animation: wave 1s ease-in-out infinite;
+        }
+        .audio-wave span:nth-child(2) { animation-delay: 0.2s; }
+        .audio-wave span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes wave { 0%, 100% { height: 4px; box-shadow: 0 0 2px var(--gold-base); } 50% { height: 16px; box-shadow: 0 0 8px var(--gold-light); } }
+
+
+        /* === CHỐNG COPY / ZOOM / PHÓNG TO === */
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            touch-action: pan-y;
+            overscroll-behavior: none;
+        }
+        .page { touch-action: pan-y; }
+        .page-inner { touch-action: pan-y; }
+
+        /* === FIT MỌI KÍCH THƯỚC ĐIỆN THOẠI === */
+        @media (max-width: 380px) {
+            .page-inner {
+                padding: 2.8rem 1rem 11rem 1rem;
+            }
+            .chapter-title { font-size: 1.45rem !important; }
+            .read-paragraph { font-size: 1.05rem; line-height: 1.75; }
+            .glass-player { width: 94%; padding: 0.5rem 0.9rem; }
+            .play-btn-3d { width: 52px; height: 52px; font-size: 1.3rem; }
+        }
+        @media (max-width: 320px) {
+            .page-inner { padding: 2.5rem 0.9rem 10rem 0.9rem; }
+            .chapter-title { font-size: 1.3rem !important; }
+            .read-paragraph { font-size: 1rem; padding: 0.9rem 0.8rem; }
+        }
+        @media (min-height: 800px) {
+            .page-inner { padding-bottom: 14rem; }
+        }
+
+        /* Transition mượt khi đổi ảnh */
+        .page-bg-img {
+            transition: opacity 0.6s ease;
+        }
+        .page-bg-img.fade-out { opacity: 0; }
+        .page-bg-img.fade-in  { opacity: 1; }
+
+        /* ====== COMPLETION SCREEN ====== */
+        #completionScreen {
+            position: fixed; inset: 0; z-index: 200;
+            background: radial-gradient(ellipse at 50% 60%, #1e0a00 0%, #000 100%);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            opacity: 0; transform: translateY(100vh);
+            transition: none; pointer-events: none; overflow: hidden;
+        }
+        #completionScreen.show {
+            opacity: 1; transform: translateY(0); pointer-events: all;
+            transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes spinDharma { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes floatUp {
+            0%   { transform: translateY(110vh) rotate(0deg) scale(0.5); opacity: 0; }
+            8%   { opacity: 0.9; }
+            92%  { opacity: 0.5; }
+            100% { transform: translateY(-20px) rotate(600deg) scale(1.2); opacity: 0; }
+        }
+        @keyframes goldPulse {
+            0%,100%{ filter: drop-shadow(0 0 12px #d4af37) drop-shadow(0 0 25px #ffd700); }
+            50%    { filter: drop-shadow(0 0 25px #fff8a0) drop-shadow(0 0 50px #ffd700); }
+        }
+        @keyframes revealUp {
+            from { opacity:0; transform: translateY(30px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        .c-petal {
+            position: absolute; width: 18px; height: 26px;
+            border-radius: 80% 0 80% 0; animation: floatUp linear infinite;
+            pointer-events: none; bottom: -40px;
+        }
+        #completionWheelWrap {
+            animation: goldPulse 2.5s ease-in-out infinite;
+            margin-bottom: 2.5rem;
+        }
+        #completionWheelWrap svg {
+            animation: spinDharma 8s linear infinite;
+            width: 100px; height: 100px;
+        }
+        #completionTitle {
+            opacity: 0; font-family: 'Playfair Display', serif;
+            font-size: 1.6rem; color: #ffeba1;
+            text-shadow: 0 0 20px rgba(212,175,55,0.8);
+            letter-spacing: 0.1em; text-align: center;
+            margin-bottom: 0.8rem;
+        }
+        #completionSub {
+            opacity: 0; font-family: 'Lora', serif;
+            font-size: 1rem; color: rgba(255,255,255,0.65);
+            text-align: center; line-height: 1.8;
+            margin-bottom: 2.5rem;
+        }
+        #btnEnterPhapAm {
+            opacity: 0;
+            background: linear-gradient(145deg, #ffe58f, #d4af37, #997000);
+            border: 2px solid rgba(255,235,161,0.8);
+            box-shadow: 0 0 30px rgba(212,175,55,0.5), 0 10px 20px rgba(0,0,0,0.7),
+                        inset 0 6px 8px rgba(255,255,255,0.6);
+            color: #2b1300; font-weight: 900; font-size: 1.1rem;
+            border-radius: 50px; padding: 0.85rem 2.5rem;
+            cursor: pointer; outline: none;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+            animation: none;
+        }
+        #btnEnterPhapAm:active { transform: scale(0.95) translateY(4px); }
+
+
+        /* ===== BTN "XEM VIDEO" nổi trên glass player ===== */
+        #btnVideoFeed {
+            position: fixed;
+            bottom: 7.8rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: linear-gradient(135deg, rgba(20,10,2,0.82), rgba(40,20,5,0.78));
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(212,175,55,0.45);
+            border-top: 1px solid rgba(255,235,161,0.55);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,235,161,0.25);
+            color: #ffeba1; font-family: 'Lora', serif;
+            font-size: 0.82rem; letter-spacing: 0.12em;
+            padding: 0.55rem 1.5rem; border-radius: 50px;
+            cursor: pointer; outline: none; z-index: 90;
+            transition: transform 0.7s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s ease;
+            display: flex; align-items: center; gap: 8px;
+            white-space: nowrap; opacity: 0;
+        }
+        #btnVideoFeed.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        #btnVideoFeed:active { transform: translateX(-50%) scale(0.95); }
+        #btnVideoFeed i { color: var(--gold-base); font-size: 1rem; }
+
+        /* ===== VIDEO FEED PAGE ===== */
+        #videoFeedPage {
+            position: fixed; inset: 0; z-index: 160;
+            background: #000;
+            opacity: 0; transform: translateX(100%);
+            transition: none; pointer-events: none;
+            overflow: hidden;
+        }
+        #videoFeedPage.vf-show {
+            opacity: 1; transform: translateX(0); pointer-events: all;
+            transition: opacity 0.65s ease, transform 0.65s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        /* Scroll container - CSS scroll-snap for smooth TikTok */
+        #vfScroll {
+            width: 100%; height: 100vh;
+            overflow-y: scroll; overflow-x: hidden;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none; overscroll-behavior: contain;
+        }
+        #vfScroll::-webkit-scrollbar { display: none; }
+
+        .vf-card {
+            width: 100%; height: 100vh;
+            position: relative; overflow: hidden;
+            scroll-snap-align: start;
+            flex-shrink: 0;
+        }
+
+        /* Video element phủ kín thẻ */
+        .vf-video {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; background: #000;
+        }
+
+        /* Gradient overlay */
+        .vf-overlay {
+            position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.3) 0%,
+                transparent 25%,
+                transparent 55%,
+                rgba(0,0,0,0.7) 100%
+            );
+            z-index: 2;
+        }
+
+        /* iOS 26 Liquid Glass */
+        .liq {
+            background: rgba(255,255,255,0.09);
+            backdrop-filter: blur(26px) saturate(190%);
+            -webkit-backdrop-filter: blur(26px) saturate(190%);
+            border: 1px solid rgba(255,255,255,0.20);
+            border-top: 1px solid rgba(255,255,255,0.38);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.35),
+                        inset 0 1px 0 rgba(255,255,255,0.42),
+                        inset 0 -1px 0 rgba(0,0,0,0.18);
+        }
+
+        /* Nút play trung tâm khi pause */
+        .vf-tap-play {
+            position: absolute; inset: 0; z-index: 3;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; pointer-events: all;
+        }
+        .vf-tap-play .vf-big-icon {
+            width: 78px; height: 78px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; color: #fff; transition: all 0.25s ease;
+            opacity: 0; transform: scale(0.5);
+        }
+        .vf-tap-play.showing .vf-big-icon { opacity: 1; transform: scale(1); }
+
+        /* Action buttons (right side) */
+        .vf-actions {
+            position: absolute; right: 14px; bottom: 160px;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 18px; z-index: 5;
+        }
+        .vf-act-btn {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 5px; cursor: pointer;
+            border: none; background: none; outline: none;
+            padding: 0;
+        }
+        .vf-act-circle {
+            width: 48px; height: 48px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem; transition: transform 0.2s ease;
+        }
+        .vf-act-btn:active .vf-act-circle { transform: scale(0.88); }
+        .vf-act-label {
+            font-size: 0.68rem; color: rgba(255,255,255,0.8);
+            font-family: 'Lora', serif; letter-spacing: 0.04em;
+        }
+        @keyframes heartPop2 {
+            0%{transform:scale(1)} 30%{transform:scale(1.75)}
+            55%{transform:scale(0.82)} 75%{transform:scale(1.2)} 100%{transform:scale(1)}
+        }
+        .vf-liked { animation: heartPop2 0.42s ease forwards !important; color: #ff3b5c !important; }
+
+        /* Bottom info */
+        .vf-info {
+            position: absolute; bottom: 0; left: 0; right: 64px;
+            padding: 1.2rem 1.2rem 2.2rem 1.2rem; z-index: 5;
+        }
+        .vf-video-num {
+            font-size: 0.7rem; letter-spacing: 0.22em;
+            color: rgba(255,255,255,0.45); text-transform: uppercase; margin-bottom: 0.25rem;
+        }
+        .vf-video-title {
+            font-family: 'Playfair Display', serif; font-weight: 700;
+            font-size: 1.15rem; color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.7); margin-bottom: 0.9rem;
+        }
+        /* Progress bar */
+        .vf-prog-wrap {
+            height: 2.5px; background: rgba(255,255,255,0.18);
+            border-radius: 3px; overflow: hidden; cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+        .vf-prog-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(to right, #d4af37, #ffeba1);
+            border-radius: 3px; transition: width 0.4s linear;
+        }
+        .vf-time {
+            display: flex; justify-content: space-between;
+            font-size: 0.68rem; color: rgba(255,255,255,0.42);
+        }
+
+        /* Header bar */
+        #vfHeader {
+            position: absolute; top: 0; left: 0; right: 0;
+            padding: 52px 16px 12px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 10; pointer-events: none;
+        }
+        #vfHeader > * { pointer-events: all; }
+        #vfBackBtn, #vfPlaylistBtn {
+            width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; color: #fff; cursor: pointer;
+            border: none; outline: none;
+        }
+        #vfTitle {
+            font-family: 'Playfair Display', serif; font-size: 1rem;
+            font-weight: 700; color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            letter-spacing: 0.05em;
+        }
+        #vfCounter {
+            font-size: 0.72rem; color: rgba(255,255,255,0.55);
+            font-family: 'Lora', serif; text-align: center;
+            letter-spacing: 0.08em; margin-top: 2px;
+        }
+
+        /* ===== PLAYLIST SHEET ===== */
+        #vfPlaylistSheet {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            max-height: 72vh; z-index: 20;
+            border-radius: 20px 20px 0 0; overflow: hidden;
+            transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+        }
+        #vfPlaylistSheet.open { transform: translateY(0); }
+        #vfPlaylistSheet .sheet-bg {
+            position: absolute; inset: 0;
+            background: rgba(8,4,1,0.92);
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border-top: 1px solid rgba(212,175,55,0.25);
+        }
+        .sheet-inner { position: relative; z-index: 1; }
+        .sheet-handle {
+            width: 40px; height: 4px; border-radius: 4px;
+            background: rgba(255,255,255,0.2); margin: 10px auto 0 auto;
+        }
+        .sheet-title {
+            font-family: 'Playfair Display',serif; font-size: 1rem;
+            color: #ffeba1; text-align: center; padding: 10px 0 8px;
+            letter-spacing: 0.1em;
+        }
+        .sheet-list {
+            overflow-y: auto; max-height: calc(72vh - 80px);
+            padding: 0 0 1rem 0;
+        }
+        .sheet-list::-webkit-scrollbar { width: 3px; }
+        .sheet-list::-webkit-scrollbar-track { background: transparent; }
+        .sheet-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 3px; }
+        .sheet-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 20px; cursor: pointer;
+            transition: background 0.2s ease; border: none;
+            background: none; width: 100%; text-align: left; outline: none;
+        }
+        .sheet-item:hover, .sheet-item:active {
+            background: rgba(212,175,55,0.12);
+        }
+        .sheet-item.active { background: rgba(212,175,55,0.18); }
+        .sheet-item-num {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+        }
+        .sheet-item.active .sheet-item-num { background: var(--gold-base); color: #1a0800; }
+        .sheet-item:not(.active) .sheet-item-num { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+        .sheet-item-info { flex: 1; min-width: 0; }
+        .sheet-item-title {
+            font-family: 'Lora',serif; font-size: 0.9rem;
+            color: rgba(255,255,255,0.85); white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        .sheet-item.active .sheet-item-title { color: #ffeba1; font-weight: 600; }
+        .sheet-item-dur { font-size: 0.68rem; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+        /* Loading empty state */
+        #vfLoading {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 5;
+            color: rgba(255,255,255,0.45); gap: 1rem;
+        }
+        #vfLoading i { font-size: 2.5rem; animation: spinDharma 2s linear infinite; color: rgba(212,175,55,0.5); }
+
+        /* Ripple on tap */
+        @keyframes vfRipple {
+            from { transform: translate(-50%,-50%) scale(0); opacity: 0.5; }
+            to   { transform: translate(-50%,-50%) scale(5); opacity: 0; }
+        }
+        .vf-ripple {
+            position: absolute; width: 100px; height: 100px;
+            border-radius: 50%; pointer-events: none;
+            background: radial-gradient(circle, rgba(212,175,55,0.3), transparent 70%);
+            animation: vfRipple 0.6s ease-out forwards; z-index: 4;
+        }
+
+
+        /* ===== LOADING SPINNER PER CARD ===== */
+        .vf-spinner {
+            position: absolute; inset: 0; z-index: 6;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.25); pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .vf-spinner.hidden { opacity: 0; pointer-events: none; }
+        .vf-spinner i { font-size: 2rem; color: rgba(212,175,55,0.7); animation: spinDharma 1.2s linear infinite; }
+
+        /* ===== DOUBLE-TAP HEART ===== */
+        @keyframes dtHeart {
+            0%   { transform: translate(-50%,-50%) scale(0) rotate(-15deg); opacity: 1; }
+            30%  { transform: translate(-50%,-50%) scale(1.4) rotate(5deg); }
+            70%  { transform: translate(-50%,-50%) scale(1.1) rotate(-3deg); opacity: 1; }
+            100% { transform: translate(-50%,-50%) scale(1.3) rotate(0deg) translateY(-60px); opacity: 0; }
+        }
+        .dt-heart {
+            position: absolute; font-size: 72px; pointer-events: none; z-index: 99;
+            animation: dtHeart 0.85s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            color: #ff3b5c; filter: drop-shadow(0 4px 12px rgba(255,59,92,0.5));
+        }
+
+        /* ===== SPEED CONTROL ===== */
+        #vfSpeedPanel {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            z-index: 30; padding: 52px 0 0 0;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #vfSpeedBtns {
+            display: none; gap: 8px; flex-wrap: nowrap;
+        }
+        #vfSpeedBtns.open { display: flex; }
+        .spd-btn {
+            padding: 5px 12px; border-radius: 50px; font-size: 0.72rem;
+            font-family: 'Lora', serif; letter-spacing: 0.06em;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.7); transition: all 0.2s;
+            background: rgba(0,0,0,0.5); outline: none;
+        }
+        .spd-btn.active {
+            background: var(--gold-base); color: #1a0800;
+            border-color: var(--gold-light); font-weight: 700;
+        }
+
+        /* ===== MUTE BUTTON ===== */
+        #vfMuteBtn {
+            position: absolute; top: 56px; right: 68px;
+            width: 38px; height: 38px; border-radius: 50%; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; color: #fff; cursor: pointer;
+            border: none; outline: none; transition: transform 0.2s;
+        }
+        #vfMuteBtn:active { transform: scale(0.88); }
+
+        /* ===== PROGRESS BAR DRAG ===== */
+        .vf-prog-wrap { cursor: pointer; padding: 6px 0; margin: -6px 0; }
+        .vf-prog-wrap:hover .vf-prog-bar,
+        .vf-prog-wrap:active .vf-prog-bar { height: 4px; transition: height 0.15s ease; }
+
+        /* ===== BOOK READING PROGRESS ===== */
+        .reading-progress-bar {
+            position: absolute; bottom: 0; left: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--gold-base), var(--gold-light));
+            border-radius: 2px; z-index: 90;
+            transition: width 0.5s ease;
+        }
+
+        /* ===== PWA / APP-LIKE ===== */
+        @media (display-mode: standalone) {
+            #btnVideoFeed { bottom: 8.5rem; }
+            .glass-player { bottom: 2.5rem; }
+        }
+
+        /* ===== RESTORE TOAST ===== */
+        #vfRestoreToast {
+            position: absolute; top: 110px; left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(12,6,1,0.88);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(212,175,55,0.3);
+            color: #ffeba1; font-family: 'Lora', serif;
+            font-size: 0.78rem; letter-spacing: 0.08em;
+            padding: 7px 18px; border-radius: 50px; z-index: 25;
+            opacity: 0; transition: all 0.4s ease;
+            pointer-events: none; white-space: nowrap;
+        }
+        #vfRestoreToast.show {
+            opacity: 1; transform: translateX(-50%) translateY(0);
+        }
+
+        /* ===== VIDEO CARD ENTRANCE ===== */
+        @keyframes cardIn { from { opacity:0; transform:scale(0.97); } to { opacity:1; transform:scale(1); } }
+        .vf-card { animation: cardIn 0.4s ease both; }
+
+        /* Seek highlight on progress bar */
+        .vf-prog-wrap::after {
+            content: ''; position: absolute;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--gold-light);
+            top: 50%; transform: translate(-6px, -50%);
+            left: var(--seek-pct, 0%);
+            opacity: 0; transition: opacity 0.2s, left 0s;
+            pointer-events: none;
+        }
+        .vf-prog-wrap:active::after { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <div class="book-container">
+        
+        <!-- TRANG BÌA -->
+        <div id="coverPage" class="cover">
+            <div class="text-center mt-12">
+                <h1 class="shiny-gold-text text-5xl sm:text-6xl font-black tracking-[0.15em] leading-tight">ĐIỆP<br>NĂM GIỚI</h1>
+            </div>
+
+            <div class="w-64 h-64 relative my-auto dharma-wheel">
+                <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" stroke="#ffeba1" stroke-width="1.5" style="filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));">
+                    <circle cx="50" cy="50" r="40" stroke-width="2" stroke="url(#goldGrad)"/>
+                    <circle cx="50" cy="50" r="37" stroke-width="0.5" stroke-dasharray="2 2" stroke="#d4af37"/>
+                    <circle cx="50" cy="50" r="12" stroke-width="2" stroke="url(#goldGrad)"/>
+                    <circle cx="50" cy="50" r="6" fill="url(#goldGrad)"/>
+                    <g stroke-width="1.5" stroke="url(#goldGrad)">
+                        <line x1="50" y1="10" x2="50" y2="38" />
+                        <line x1="50" y1="62" x2="50" y2="90" />
+                        <line x1="10" y1="50" x2="38" y2="50" />
+                        <line x1="62" y1="50" x2="90" y2="50" />
+                        <line x1="21.7" y1="21.7" x2="41.5" y2="41.5" />
+                        <line x1="78.3" y1="78.3" x2="58.5" y2="58.5" />
+                        <line x1="21.7" y1="78.3" x2="41.5" y2="58.5" />
+                        <line x1="78.3" y1="21.7" x2="58.5" y2="41.5" />
+                    </g>
+                    <defs>
+                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffe58f" />
+                            <stop offset="50%" stop-color="#d4af37" />
+                            <stop offset="100%" stop-color="#997000" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+
+            <button onclick="openBook()" class="btn-3d-gold mb-16 px-12 py-3 tracking-widest text-lg">MỞ</button>
+        </div>
+
+        <!-- MÀN HÌNH ĐỌC SÁCH (LẬT TRANG) -->
+        <div id="bookViewport" class="book-viewport">
+            <!-- Nút chuyển trang thủ công -->
+            <div class="reading-progress-bar" id="readingProgress" style="width:0%"></div>
+            <button id="btnPrevPage" class="nav-btn left disabled" onclick="manualTurnPage(-1)"><i class="fas fa-chevron-left"></i></button>
+            <button id="btnNextPage" class="nav-btn right" onclick="manualTurnPage(1)"><i class="fas fa-chevron-right"></i></button>
+            <div id="pageIndicator" class="page-indicator">1 / 10</div>
+
+            <!-- Băng chuyền chứa các trang -->
+            <div id="pagesTrack" class="pages-track">
+                <!-- JS sẽ render các div.page vào đây -->
+            </div>
+        </div>
+
+        <!-- THANH ĐIỀU KHIỂN -->
+        <div id="glassPlayer" class="glass-player">
+            <div class="flex items-center gap-3 w-1/2">
+                <div id="waveAnim" class="audio-wave hidden"><span></span><span></span><span></span></div>
+                <div id="idleIcon" class="text-[#d4af37] opacity-80 text-xl"><i class="fas fa-om"></i></div>
+                <div class="flex flex-col">
+                    <span id="playerStatus" class="text-[#ffeba1] text-[11px] font-black uppercase tracking-widest">Sẵn sàng</span>
+                    <span class="text-white/60 text-[10px] italic mt-0.5">Chạm câu để đọc</span>
+                </div>
+            </div>
+
+            <button id="btnPlay" onclick="togglePlay()" class="play-btn-3d">
+                <i id="playIcon" class="fas fa-play ml-1"></i>
+            </button>
+
+            <button onclick="closeBook()" class="text-white/50 hover:text-[#ffeba1] p-2 text-xl" title="Trở về bìa">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+
+        <!-- ===== COMPLETION SCREEN ===== -->
+        <div id="completionScreen">
+            <!-- Petals generated by JS -->
+            <div id="completionWheelWrap">
+                <svg viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1.5">
+                    <circle cx="50" cy="50" r="42" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="38" stroke-width="0.5" stroke-dasharray="2 2" stroke="rgba(212,175,55,0.4)"/>
+                    <circle cx="50" cy="50" r="12" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="5" fill="#d4af37"/>
+                    <line x1="50" y1="8" x2="50" y2="38"/>
+                    <line x1="50" y1="62" x2="50" y2="92"/>
+                    <line x1="8"  y1="50" x2="38" y2="50"/>
+                    <line x1="62" y1="50" x2="92" y2="50"/>
+                    <line x1="20" y1="20" x2="41" y2="41"/>
+                    <line x1="80" y1="80" x2="59" y2="59"/>
+                    <line x1="20" y1="80" x2="41" y2="59"/>
+                    <line x1="80" y1="20" x2="59" y2="41"/>
+                    <defs>
+                        <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                </svg>
+            </div>
+            <div class="text-center px-8 relative" style="z-index:10">
+                <p id="completionNamMo" style="font-family:Lora,serif;font-size:0.8rem;letter-spacing:0.3em;color:rgba(212,175,55,0.6);text-transform:uppercase;margin-bottom:1rem;opacity:0">
+                    🙏 &nbsp; Kính lễ &nbsp; 🙏
+                </p>
+                <h2 id="completionTitle">Nam Mô A Di Đà Phật</h2>
+                <p id="completionSub">
+                    Bạn đã viên mãn đọc qua<br>
+                    <span style="color:#ffeba1;font-weight:600">Điệp Năm Giới Quý Báu</span><br>
+                    <span style="font-size:0.85rem;color:rgba(255,255,255,0.45)">Công đức vô lượng vô biên</span>
+                </p>
+                <button id="btnEnterPhapAm" onclick="openVideoFeed()">
+                    🎬&nbsp; Xem Video Pháp Âm
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== NÚT XEM VIDEO (luôn hiển thị khi đọc sách) ===== -->
+        <button id="btnVideoFeed" onclick="openVideoFeed()">
+            <i class="fas fa-photo-film"></i> XEM VIDEO
+        </button>
+
+        <!-- ===== VIDEO FEED PAGE (TikTok style) ===== -->
+        <div id="videoFeedPage">
+            <!-- Header -->
+            <div id="vfHeader">
+                <button id="vfBackBtn" class="liq" onclick="closeVideoFeed()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div style="text-align:center">
+                    <div id="vfTitle">☸ Pháp Âm</div>
+                    <div id="vfCounter">Đang tải…</div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                <button id="vfSpeedToggleBtn" class="liq" onclick="toggleVfSpeed()" 
+                    style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#ffeba1;font-family:Lora,serif;font-weight:700;border:none;cursor:pointer;" 
+                    title="Tốc độ phát" id="vfSpeedLabel">1×</button>
+                <button id="vfPlaylistBtn" class="liq" onclick="toggleVfPlaylist()" title="Danh sách">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+            </div>
+            </div>
+
+            <!-- Mute button -->
+            <button id="vfMuteBtn" class="liq" onclick="vfToggleMute()">
+                <i class="fas fa-volume-high" id="vfMuteIcon"></i>
+            </button>
+
+            <!-- Speed control -->
+            <div id="vfSpeedPanel">
+                <div id="vfSpeedBtns">
+                    <button class="spd-btn" onclick="vfSetSpeed(0.75)">0.75×</button>
+                    <button class="spd-btn active" onclick="vfSetSpeed(1)">1×</button>
+                    <button class="spd-btn" onclick="vfSetSpeed(1.25)">1.25×</button>
+                    <button class="spd-btn" onclick="vfSetSpeed(1.5)">1.5×</button>
+                    <button class="spd-btn" onclick="vfSetSpeed(2)">2×</button>
+                </div>
+            </div>
+
+            <!-- Restore toast -->
+            <div id="vfRestoreToast">▶ Tiếp tục từ video trước</div>
+
+            <!-- Video scroll container -->
+            <div id="vfScroll">
+                <div id="vfLoading">
+                    <i class="fas fa-dharmachakra"></i>
+                    <p style="font-family:Lora,serif;font-size:0.88rem;text-align:center;line-height:1.8">
+                        Đang tìm video…<br>
+                        <span style="font-size:0.75rem;color:rgba(212,175,55,0.5)">Vui lòng<br>chờ</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Playlist sheet -->
+            <div id="vfPlaylistSheet">
+                <div class="sheet-bg"></div>
+                <div class="sheet-inner">
+                    <div class="sheet-handle"></div>
+                    <div class="sheet-title">☸ Danh Sách Video</div>
+                    <div class="sheet-list" id="vfPlaylistItems"></div>
+                </div>
+            </div>
+
+            <!-- Tap to close playlist -->
+            <div id="vfPlaylistBg" onclick="toggleVfPlaylist(false)"
+                style="display:none;position:absolute;inset:0;z-index:19;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- ÂM THANH (Chuông Chùa & Mõ) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playZenSound(type) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            if (type === 'temple_bell') {
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator(); 
+                const gainNode = audioCtx.createGain();
+
+                osc1.type = 'sine'; osc1.frequency.setValueAtTime(220, audioCtx.currentTime); 
+                osc2.type = 'sine'; osc2.frequency.setValueAtTime(440, audioCtx.currentTime); 
+
+                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 4.5);
+
+                osc1.connect(gainNode); osc2.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc1.start(audioCtx.currentTime); osc2.start(audioCtx.currentTime);
+                osc1.stop(audioCtx.currentTime + 4.5); osc2.stop(audioCtx.currentTime + 4.5);
+
+            } else if (type === 'tap') {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.15);
+            }
+        }
+
+        // --- DỮ LIỆU ĐƯỢC CHIA THÀNH CÁC TRANG ---
+        const bookPagesData = [
+            // Trang 1
+            [
+                { type: 'title', text: "Ý Nghĩa Quy Y" },
+                { type: 'para', text: "Quy Y Tam Bảo là quay về nương tựa ba ngôi báu Phật, Pháp và Tăng." },
+                { type: 'para', text: "Tam Bảo luôn có mặt trong khắp mười phương thế giới mà cũng có mặt trong mọi người và mọi loài." },
+                { type: 'para', text: "Ta trở về quy y nơi Phật, nơi Pháp và nơi Tăng cũng có nghĩa là trở về tin tưởng ở khả năng giác ngộ nơi tự tánh của chính mình, ở khả năng khai mở, phát triển hiểu biết và thương yêu nơi bản thân mình, ở khả năng thực tập hành đạo của cá nhân và đoàn thể mình." },
+                { type: 'para', text: "Quý vị đã tiếp nhận Ba Pháp Quy Y và Năm Giới Quý Báu, đó là nền tảng của hạnh phúc gia đình và chất liệu của chí nguyện lợi tha." },
+                { type: 'para', text: "Quý vị phải ôn tụng thường xuyên giới tướng mỗi tháng ít nhất là một lần tại chùa hoặc tại nhà để sự học hỏi và hành trì Ba Pháp Quy Y và Năm Giới Quý Báu ngày càng sâu sắc và lớn rộng." }
+            ],
+            // Trang 2
+            [
+                { type: 'title', text: "Ba Pháp Quy Y" },
+                { type: 'para', text: "Là đệ tử Phật, quý vị nên tinh tiến tu học theo con đường mà đức Phật đã dày công chỉ dạy để tạo an lạc và hạnh phúc cho chính mình và cho mọi người." },
+                { type: 'para', text: "Quy y Phật: Con về nương tựa Phật, người đưa đường chỉ lối cho con trong cuộc đời." },
+                { type: 'para', text: "Quy y Pháp: Con về nương tựa Pháp, con đường của tình thương và sự hiểu biết." },
+                { type: 'para', text: "Quy y Tăng: Con về nương tựa Tăng, đoàn thể của những người nguyện sống cuộc đời tỉnh thức." }
+            ],
+            // Trang 3
+            [
+                { type: 'title', text: "Năm Giới Quý Báu" },
+                { type: 'para', text: "Năm Giới là nền tảng cho một cuộc sống có hạnh phúc và có chí hướng vị tha, có năng lực bảo vệ sự sống và làm đẹp cho cuộc đời." },
+                { type: 'para', text: "Năm Giới là những nguyên tắc hướng dẫn chúng ta về hướng an lạc, giải thoát và giác ngộ." },
+                { type: 'para', text: "Năm Giới là nền tảng của hạnh phúc cá nhân, hạnh phúc của gia đình và của xã hội." },
+                { type: 'para', text: "Học hỏi và thực hành theo Năm Giới, ta sẽ đi đúng con đường chánh pháp, ta sẽ tránh được lỗi lầm, khổ đau, sợ hãi và thất vọng, ta sẽ xây dựng được an lạc hạnh phúc cho ta, cho gia đình ta và đóng góp vào phẩm chất an lạc và hòa bình của xã hội." }
+            ],
+            // Trang 4
+            [
+                { type: 'title', text: "1. Giới thứ nhất - Bảo vệ sự sống" },
+                { type: 'para', text: "Ý thức được những khổ đau do sự sát hại gây ra, con xin nuôi dưỡng tình thương, bảo vệ sự sống của mọi người và mọi loài." },
+                { type: 'para', text: "Con nguyện không giết hại hay khuyến khích mọi sự sát hại dù trong tâm tưởng hay trong cách sống hằng ngày của chúng con." }
+            ],
+            // Trang 5
+            [
+                { type: 'title', text: "2. Giới thứ hai - Hạnh phúc chân thực" },
+                { type: 'para', text: "Ý thức được những khổ đau do lường gạt, trộm cắp, áp bức và bất công xã hội gây ra, con nguyện không gian tham trộm cắp bất cứ tài vật gì của ai." },
+                { type: 'para', text: "Con nguyện chia sẻ thì giờ, năng lực và tài vật của con với những người đang trong hoàn cảnh thiếu thốn." }
+            ],
+            // Trang 6
+            [
+                { type: 'title', text: "3. Giới thứ ba - Tình thương đích thực" },
+                { type: 'para', text: "Ý thức được những khổ đau do tà hạnh gây ra, con xin học theo tinh thần trách nhiệm không làm việc dục nhiễm với những người không phải là vợ hay chồng của con." },
+                { type: 'para', text: "Con ý thức được rằng những hành động bất chánh sẽ gây ra những đau khổ cho người khác và cho chính con." },
+                { type: 'para', text: "Con biết muốn bảo vệ hạnh phúc của mình và của người khác thì phải biết tôn trọng những cam kết của mình và của người khác." },
+                { type: 'para', text: "Con sẽ làm mọi cách có thể để bảo vệ trẻ em, không cho nạn tà dâm tiếp tục gây nên sự đổ vỡ của các gia đình và của đời sống đôi lứa." }
+            ],
+            // Trang 7
+            [
+                { type: 'title', text: "4. Giới thứ tư - Ái ngữ và lắng nghe" },
+                { type: 'para', text: "Ý thức được những khổ đau do lời nói thiếu chánh niệm và do thiếu khả năng lắng nghe gây ra." },
+                { type: 'para', text: "Con xin nguyện học các hạnh Ái Ngữ và Lắng Nghe để có thể hiến tặng niềm vui cho người, làm vơi bớt nỗi khổ đau của người." },
+                { type: 'para', text: "Con nguyện không loan truyền những tin mà con không biết chắc là có thật, không nói những điều có thể tạo nên sự bất hòa trong gia đình và trong đoàn thể." },
+                { type: 'para', text: "Con nguyện thực tập lắng nghe để hiểu người khác và giúp họ vơi nhẹ khổ đau trong lòng." }
+            ],
+            // Trang 8
+            [
+                { type: 'title', text: "5. Giới thứ năm - Nuôi dưỡng và trị liệu" },
+                { type: 'para', text: "Ý thức được những khổ đau do thói quen tiêu thụ không chánh niệm gây nên, con nguyện học hỏi cách chuyển hóa thân tâm, xây dựng sức khỏe cơ thể và tâm hồn bằng cách thực tập chánh niệm trong việc ăn uống và tiêu thụ." },
+                { type: 'para', text: "Con nguyện không uống rượu, không sử dụng các chất ma túy, không ăn uống hoặc tiêu thụ bất cứ một sản phẩm nào có độc tố, trong đó có internet, phim ảnh, truyền thanh, truyền hình, sách báo và bài bạc." }
+            ],
+            // Trang 9
+            [
+                { type: 'title', text: "Bảy Điều Nguyện" },
+                { type: 'para', text: "1. Nguyện thực tập ăn chay." },
+                { type: 'para', text: "2. Nguyện siêng năng học hỏi giáo pháp." },
+                { type: 'para', text: "3. Nguyện thường xuyên tọa Thiền, lễ Phật, tụng Kinh, niệm Phật." },
+                { type: 'para', text: "4. Nguyện cố gắng làm việc thiện." },
+                { type: 'para', text: "5. Nguyện giúp gia đình và mọi người học hiểu Phật Pháp." },
+                { type: 'para', text: "6. Nguyện hiếu thảo cha mẹ." },
+                { type: 'para', text: "7. Nguyện trọn đời sống theo lời Phật dạy." }
+            ],
+            // Trang 10
+            [
+                { type: 'title', text: "Lời dạy về Thiện sự" },
+                { type: 'para', text: "Như từ một đống hoa,\nNhiều tràng hoa được kết.\nCũng vậy, thân sanh tử,\nLàm được nhiều thiện sự.", center: true },
+                { type: 'title', text: "Lời dạy về Tự quán chiếu" },
+                { type: 'para', text: "Không nên nhìn lỗi người,\nNgười làm hay không làm.\nNên nhìn tự chính mình,\nCó làm hay không làm.", center: true }
+            ]
+        ];
+
+        // --- STATE & TTS ---
+        const synth = window.speechSynthesis;
+        let playQueue = []; // Mảng phẳng chứa tất cả các câu để đọc liên tục
+        let currentIndex = 0; // Vị trí câu đang đọc
+        let currentPage = 0; // Trang hiện tại (0 đến 9)
+        const totalPages = bookPagesData.length;
+        
+        let isPlaying = false;
+        let cachedVoice = null;
+        let speechTimeout = null;
+
+        // Elements
+        const coverPage = document.getElementById('coverPage');
+        const bookViewport = document.getElementById('bookViewport');
+        const pagesTrack = document.getElementById('pagesTrack');
+        const glassPlayer = document.getElementById('glassPlayer');
+        const playIcon = document.getElementById('playIcon');
+        const playerStatus = document.getElementById('playerStatus');
+        const waveAnim = document.getElementById('waveAnim');
+        const idleIcon = document.getElementById('idleIcon');
+        const pageIndicator = document.getElementById('pageIndicator');
+        const btnPrevPage = document.getElementById('btnPrevPage');
+        const btnNextPage = document.getElementById('btnNextPage');
+
+        function loadVoices() {
+            const voices = synth.getVoices();
+            if (voices.length > 0) {
+                cachedVoice = voices.find(v => v.lang.includes('vi') && v.name.includes('Google')) || 
+                              voices.find(v => v.lang.includes('vi')) || voices[0];
+            }
+        }
+        loadVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
+
+        // --- POOL ẢNH CHO TỪNG TRANG (đổi mỗi lần chuyển trang) ---
+        const pageImagePools = [
+            // Trang 1: Quy Y - Phật / chùa / hương khói
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/049dc728e4a2c405c7fbfff5bc87af8b1842a251.jpg',
+                'https://picsum.photos/seed/buddh1x/800/1400',
+                'https://picsum.photos/seed/temple7x/800/1400',
+            ],
+            // Trang 2: Ba Pháp - hoa sen / nước / phản chiếu
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/71e779af6dd19ae7abc167e5ed97f23899a2992e.jpg',
+                'https://picsum.photos/seed/lotus9x/800/1400',
+                'https://picsum.photos/seed/water55x/800/1400',
+            ],
+            // Trang 3: Năm Giới - thiền định / núi / bình minh
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/009cf5daed9a0c56e96a6a03229d6b56b6be9cec.jpg',
+                'https://picsum.photos/seed/mount2x/800/1400',
+                'https://picsum.photos/seed/sunrs3x/800/1400',
+            ],
+            // Trang 4: Giới 1 - rừng / thiên nhiên / sự sống
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/5675782bb89d1557d9aba65863567272be06cad5.jpg',
+                'https://picsum.photos/seed/forest1x/800/1400',
+                'https://picsum.photos/seed/nature2x/800/1400',
+            ],
+            // Trang 5: Giới 2 - ruộng bậc thang / phong cảnh Việt
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/b96587804a2c3f4ea010f4950b425f211107611c.jpg',
+                'https://picsum.photos/seed/rice4x/800/1400',
+                'https://picsum.photos/seed/field5x/800/1400',
+            ],
+            // Trang 6: Giới 3 - lá xanh / ánh sáng / tình thương
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/57efd1e03b5f19e52fb27b60bac38ae0d285e0a4.jpg',
+                'https://picsum.photos/seed/leaves6x/800/1400',
+                'https://picsum.photos/seed/green7x/800/1400',
+            ],
+            // Trang 7: Giới 4 - vườn zen / đá / ao
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/69e10f62e33670fc7463cbf36a8a076f5df81210.jpg',
+                'https://picsum.photos/seed/zenst8x/800/1400',
+                'https://picsum.photos/seed/pond9x/800/1400',
+            ],
+            // Trang 8: Giới 5 - tre / thảo mộc / tĩnh lặng
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/56f2be3253e6cc07c9c9094307ea5c2c4badf677.jpg',
+                'https://picsum.photos/seed/bambo8x/800/1400',
+                'https://picsum.photos/seed/herb9x/800/1400',
+            ],
+            // Trang 9: Bảy Nguyện - lá cọ / ánh sáng / cầu nguyện
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/f789f0ee704226e56d1535f1b578b26891a9a3fe.jpg',
+                'https://picsum.photos/seed/palm9x/800/1400',
+                'https://picsum.photos/seed/light1x/800/1400',
+            ],
+            // Trang 10: Thiện sự - chùa / hoa / hương
+            [
+                'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/f458e7f015a4437c2cb5b3bc0d94c55782bb4f51.jpg',
+                'https://picsum.photos/seed/flower2x/800/1400',
+                'https://picsum.photos/seed/petal3x/800/1400',
+            ],
+        ];
+        // Track chỉ số ảnh hiện tại của từng trang
+        const pageCurrentImgIdx = new Array(10).fill(0);
+
+        // --- KHỞI TẠO DOM CHO CÁC TRANG ---
+        function initBook() {
+            let globalItemIndex = 0;
+            pagesTrack.innerHTML = ''; // Xóa rỗng
+
+            bookPagesData.forEach((pageData, pIndex) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'page';
+                pageDiv.id = `page-${pIndex}`;
+                
+                // Ảnh nền thực sự dùng thẻ <img>
+                const bgImg = document.createElement('img');
+                bgImg.src = pageImagePools[pIndex][0];
+                bgImg.className = 'page-bg-img';
+                bgImg.alt = '';
+                bgImg.setAttribute('loading', 'eager');
+                pageDiv.appendChild(bgImg);
+
+                // Lớp cream mờ phủ lên ảnh
+                const creamWash = document.createElement('div');
+                creamWash.className = 'page-cream-wash';
+                pageDiv.appendChild(creamWash);
+
+                // Nội dung văn bản
+                let html = '';
+                pageData.forEach((item) => {
+                    playQueue.push({ 
+                        id: `item-${globalItemIndex}`, 
+                        text: item.text, 
+                        isTitle: item.type === 'title',
+                        pageIndex: pIndex
+                    });
+                    if (item.type === 'title') {
+                        html += `<h2 id="item-${globalItemIndex}" class="chapter-title shiny-gold-text" onclick="jumpTo(${globalItemIndex})">${item.text}</h2>`;
+                    } else if (item.type === 'para') {
+                        let formattedText = item.text.replace(/\n/g, '<br>');
+                        let alignClass = item.center ? 'text-center italic font-medium text-[1.3rem]' : 'text-justify';
+                        html += `<p id="item-${globalItemIndex}" class="read-paragraph ${alignClass}" onclick="jumpTo(${globalItemIndex})">${formattedText}</p>`;
+                    }
+                    globalItemIndex++;
+                });
+
+                html += `<div class="text-center mt-10 mb-20" style="opacity:0.2"><i class="fas fa-dharmachakra text-[#8a6345] text-3xl"></i></div>`;
+
+                const innerDiv = document.createElement('div');
+                innerDiv.className = 'page-inner';
+                innerDiv.innerHTML = html;
+                pageDiv.appendChild(innerDiv);
+                pagesTrack.appendChild(pageDiv);
+            });
+            
+            updatePageUI();
+        }
+
+        // --- LOGIC LẬT TRANG (CHUYỂN ĐỘNG TRƯỢT X) ---
+        function updatePageUI() {
+            // Trượt Track
+            pagesTrack.style.transform = `translateX(-${currentPage * 100}%)`;
+            pageIndicator.innerText = `${currentPage + 1} / ${totalPages}`;
+            
+            // Cập nhật nút bấm thủ công
+            btnPrevPage.classList.toggle('disabled', currentPage === 0);
+            btnNextPage.classList.toggle('disabled', currentPage === totalPages - 1);
+        }
+
+        function manualTurnPage(direction) {
+            // Khi người dùng tự lật trang -> tắt Audio để họ chủ động đọc
+            if(isPlaying) stopCompletely(); 
+            playZenSound('tap');
+            
+            currentPage += direction;
+            if (currentPage < 0) currentPage = 0;
+            if (currentPage >= totalPages) currentPage = totalPages - 1;
+            
+            updatePageUI();
+        }
+
+        function autoGoToPage(targetPage, callback) {
+            if (currentPage !== targetPage) {
+                currentPage = targetPage;
+                updatePageUI();
+                // Đợi hiệu ứng lật trang (600ms) xong mới làm tiếp
+                setTimeout(() => { if(callback) callback(); }, 600);
+            } else {
+                if(callback) callback();
+            }
+        }
+
+        // --- ĐIỀU KHIỂN CHUNG UI ---
+        function openBook() {
+            playZenSound('temple_bell');
+            coverPage.classList.add('hidden-anim');
+            setTimeout(() => {
+                bookViewport.classList.add('visible');
+                glassPlayer.classList.add('visible');
+            }, 600);
+        }
+
+        function closeBook() {
+            stopCompletely();
+            glassPlayer.classList.remove('visible');
+            bookViewport.classList.remove('visible');
+            setTimeout(() => {
+                coverPage.classList.remove('hidden-anim');
+                currentPage = 0; updatePageUI(); // Reset về trang 1
+            }, 600);
+        }
+
+        function stopCompletely() {
+            isPlaying = false;
+            synth.cancel();
+            clearTimeout(speechTimeout);
+            updatePlayerUI();
+            clearAllHighlights();
+            bookViewport.classList.remove('is-reading');
+        }
+
+        // --- LOGIC ĐỌC TTS ---
+        function jumpTo(index) {
+            playZenSound('tap');
+            currentIndex = index;
+            // Nếu đoạn văn nằm ở trang khác, lật tới trang đó trước
+            const targetPage = playQueue[currentIndex].pageIndex;
+            
+            if(isPlaying) {
+                synth.cancel();
+                clearTimeout(speechTimeout);
+                autoGoToPage(targetPage, readCurrent);
+            } else {
+                autoGoToPage(targetPage, togglePlay);
+            }
+        }
+
+        function togglePlay() {
+            playZenSound('tap');
+            if (!synth) return;
+
+            if (isPlaying) {
+                stopCompletely();
+            } else {
+                isPlaying = true;
+                bookViewport.classList.add('is-reading');
+                updatePlayerUI();
+                readCurrent();
+            }
+        }
+
+        function readCurrent() {
+            if (!isPlaying || currentIndex >= playQueue.length) {
+                const justFinished = isPlaying && currentIndex >= playQueue.length;
+                stopCompletely();
+                currentIndex = 0;
+                if (justFinished) {
+                    // ĐÃ ĐỌC HẾT TOÀN BỘ SÁCH -> hiện completion
+                    setTimeout(() => showCompletionScreen(), 900);
+                }
+                return;
+            }
+
+            let currentItem = playQueue[currentIndex];
+            
+            // 1. Kiểm tra lật trang tự động
+            if (currentPage !== currentItem.pageIndex) {
+                autoGoToPage(currentItem.pageIndex, () => {
+                    if(isPlaying) processReading(currentItem);
+                });
+                return; // Dừng hàm hiện tại, chờ lật trang xong callback sẽ gọi processReading
+            } else {
+                processReading(currentItem);
+            }
+        }
+
+        function processReading(currentItem) {
+            clearAllHighlights();
+            
+            // Xử lý UI Focus & Cuộn nhẹ trong trang (nếu trang quá dài)
+            let el = document.getElementById(currentItem.id);
+            if (el) {
+                el.classList.add('active');
+                const pageContainer = document.getElementById(`page-${currentPage}`);
+                const elRect = el.getBoundingClientRect();
+                const containerRect = pageContainer.getBoundingClientRect();
+                
+                // Nếu bị khuất, cuộn trang hiện tại
+                const elOffset = elRect.top - containerRect.top + pageContainer.scrollTop;
+                const targetScroll = elOffset - (containerRect.height / 2) + (elRect.height / 2);
+                pageContainer.scrollTo({ top: targetScroll, behavior: 'smooth' });
+            }
+
+            let delayMs = 0;
+            if (currentItem.isTitle) {
+                playZenSound('temple_bell');
+                playerStatus.innerText = 'Đang thỉnh chuông...';
+                delayMs = 2000; // Đợi chuông 2s
+            } else {
+                playerStatus.innerText = 'Đang thiền đọc...';
+            }
+
+            speechTimeout = setTimeout(() => {
+                if (!isPlaying) return; 
+                playerStatus.innerText = 'Đang thiền đọc...';
+
+                let utterance = new SpeechSynthesisUtterance(currentItem.text);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 0.95;
+                if(cachedVoice) utterance.voice = cachedVoice;
+
+                utterance.onend = () => {
+                    currentIndex++;
+                    readCurrent(); 
+                };
+
+                utterance.onerror = (e) => {
+                    if(e.error !== 'interrupted' && e.error !== 'canceled') stopCompletely();
+                };
+
+                synth.speak(utterance);
+            }, delayMs);
+        }
+
+        function clearAllHighlights() {
+            document.querySelectorAll('.chapter-title, .read-paragraph').forEach(el => {
+                el.classList.remove('active');
+            });
+        }
+
+        function updatePlayerUI() {
+            if (isPlaying) {
+                playIcon.className = 'fas fa-pause';
+                playIcon.classList.remove('ml-1');
+                waveAnim.classList.remove('hidden');
+                idleIcon.classList.add('hidden');
+            } else {
+                playIcon.className = 'fas fa-play ml-1';
+                playerStatus.innerText = 'Tạm dừng';
+                waveAnim.classList.add('hidden');
+                idleIcon.classList.remove('hidden');
+            }
+        }
+
+
+        // --- ĐỔI ẢNH NỀN KHI CHUYỂN TRANG ---
+        function refreshBgImage(pIndex) {
+            const pool = pageImagePools[pIndex];
+            if (pool.length <= 1) return;
+            let newIdx;
+            do {
+                newIdx = Math.floor(Math.random() * pool.length);
+            } while (newIdx === pageCurrentImgIdx[pIndex]);
+            pageCurrentImgIdx[pIndex] = newIdx;
+            const imgEl = document.querySelector('#page-' + pIndex + ' .page-bg-img');
+            if (!imgEl) return;
+            imgEl.classList.add('fade-out');
+            setTimeout(() => {
+                imgEl.src = pool[newIdx];
+                imgEl.onload = () => { imgEl.classList.remove('fade-out'); };
+                imgEl.onerror = () => { imgEl.classList.remove('fade-out'); };
+            }, 300);
+        }
+
+        // --- CHỐNG ZOOM & COPY ---
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) e.preventDefault();
+        }, { passive: false });
+        // Chặn double-tap zoom
+        let lastTouch = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouch < 280) { e.preventDefault(); }
+            lastTouch = now;
+        }, false);
+        // Chặn gesture zoom (iOS Safari)
+        document.addEventListener('gesturestart', e => e.preventDefault());
+        document.addEventListener('gesturechange', e => e.preventDefault());
+        document.addEventListener('gestureend', e => e.preventDefault());
+
+
+
+        // ================================================================
+        // COMPLETION SCREEN
+        // ================================================================
+        const BUDDHIST_BG_POOL = [
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/049dc728e4a2c405c7fbfff5bc87af8b1842a251.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/71e779af6dd19ae7abc167e5ed97f23899a2992e.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/009cf5daed9a0c56e96a6a03229d6b56b6be9cec.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/5675782bb89d1557d9aba65863567272be06cad5.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/b96587804a2c3f4ea010f4950b425f211107611c.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/57efd1e03b5f19e52fb27b60bac38ae0d285e0a4.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/69e10f62e33670fc7463cbf36a8a076f5df81210.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/56f2be3253e6cc07c9c9094307ea5c2c4badf677.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/f789f0ee704226e56d1535f1b578b26891a9a3fe.jpg',
+            'https://pplx-res.cloudinary.com/image/upload/pplx_search_images/f458e7f015a4437c2cb5b3bc0d94c55782bb4f51.jpg',
+        ];
+
+        function playCompletionBell() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            [[110,0.5,8],[220,0.3,7],[330,0.2,6],[440,0.15,5.5],[660,0.08,4],[880,0.05,3]].forEach(([f,v,d],i) => {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime + i*0.04;
+                o.type='sine'; o.frequency.value=f;
+                g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+0.03);
+                g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+                o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+d);
+            });
+            setTimeout(()=>{ const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+                o.type='sine'; o.frequency.value=174;
+                g.gain.setValueAtTime(0.4,audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+5);
+                o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+5);
+            }, 2000);
+        }
+
+        function spawnCompletionPetals() {
+            const cs = document.getElementById('completionScreen');
+            const colors = ['#d4af37','#ffeba1','#ffd700','#ff9eb5','#fff8dc','#c8a2c8'];
+            for (let i=0; i<22; i++) {
+                const p = document.createElement('div'); p.className='c-petal';
+                const c = colors[i%colors.length], s = 14+Math.random()*16;
+                p.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s*1.4}px;background:${c};opacity:${0.5+Math.random()*0.4};animation-duration:${5+Math.random()*7}s;animation-delay:${Math.random()*4}s;border-radius:${Math.random()>.5?'80% 0 80% 0':'0 80% 0 80%'};`;
+                cs.appendChild(p);
+            }
+        }
+
+        function showCompletionScreen() {
+            stopCompletely();
+            const cs = document.getElementById('completionScreen');
+            cs.style.display='flex'; spawnCompletionPetals();
+            requestAnimationFrame(()=>requestAnimationFrame(()=>{
+                cs.classList.add('show');
+                setTimeout(()=>playCompletionBell(), 600);
+                [['completionNamMo',800],['completionTitle',1200],['completionSub',1900],['btnEnterPhapAm',2800]].forEach(([id,d])=>{
+                    setTimeout(()=>{ const el=document.getElementById(id); if(el){el.style.transition='all 1s ease';el.style.opacity=1;el.style.transform='translateY(0)';} },d);
+                });
+            }));
+        }
+
+        // ================================================================
+        // VIDEO FEED STATE (persists across open/close)
+        // ================================================================
+        let vfVideos  = [];          // [{src, name, idx}]
+        let vfOrder   = [];          // Shuffled index array
+        let vfPos     = -1;          // Current position (-1 = not opened yet)
+        let vfLikes   = {};          // {src: count}
+        let vfObserver= null;        // IntersectionObserver
+        let vfBuilt   = false;       // Cards already in DOM?
+        const PRELOAD = 2;           // Preload range
+
+        // ─── Auto-discover video files (unlimited) ────────────────────
+        async function discoverVideoFiles() {
+            if (vfVideos.length > 0) return vfVideos; // cached
+            const MAX = 99;
+            const checks = Array.from({length: MAX}, (_, i) => {
+                const src = `video${i+1}.mp4`;
+                return fetch(src, {method:'HEAD', cache:'no-cache'})
+                    .then(r => r.ok ? {src, name:`Video ${i+1}`, idx:i+1} : null)
+                    .catch(() => null);
+            });
+            const res = await Promise.all(checks);
+            vfVideos = res.filter(Boolean);
+            return vfVideos;
+        }
+
+        function vfShuffle() {
+            vfOrder = [...Array(vfVideos.length).keys()];
+            for (let i=vfOrder.length-1; i>0; i--) {
+                const j = Math.floor(Math.random()*(i+1));
+                [vfOrder[i],vfOrder[j]] = [vfOrder[j],vfOrder[i]];
+            }
+            if (vfPos < 0) vfPos = 0;
+        }
+
+        // ─── Build all cards (called once) ────────────────────────────
+        function vfBuildCards() {
+            if (vfBuilt) return;
+            const scroll = document.getElementById('vfScroll');
+            // Remove loading state
+            const loading = document.getElementById('vfLoading');
+            if (loading) loading.remove();
+
+            vfOrder.forEach((vidIdx, pos) => {
+                const v = vfVideos[vidIdx];
+                const card = document.createElement('div');
+                card.className = 'vf-card';
+                card.dataset.pos = pos;
+                card.dataset.src = v.src;
+
+                card.innerHTML = `
+                    <video class="vf-video" playsinline loop preload="none"
+                        style="display:block;"></video>
+                    <div class="vf-overlay"></div>
+
+                    <!-- Tap center to play/pause + ripple -->
+                    <div class="vf-tap-play" id="vfTap-${pos}" onclick="vfTapCard(${pos},event)">
+                        <div class="vf-big-icon liq" id="vfBigIcon-${pos}">
+                            <i class="fas fa-pause" id="vfBigIconI-${pos}"></i>
+                        </div>
+                    </div>
+
+                    <!-- Right side actions -->
+                    <div class="vf-actions">
+                        <button class="vf-act-btn" onclick="vfToggleLike(${pos},event)">
+                            <div class="vf-act-circle liq" id="vfLikeCircle-${pos}">
+                                <i class="fas fa-heart" id="vfLikeIcon-${pos}"
+                                    style="color:rgba(255,255,255,0.9);transition:color 0.2s;"></i>
+                            </div>
+                            <span class="vf-act-label" id="vfLikeCount-${pos}"></span>
+                        </button>
+                        <button class="vf-act-btn" onclick="vfShare(${pos})">
+                            <div class="vf-act-circle liq">
+                                <i class="fas fa-share-nodes" style="color:rgba(255,255,255,0.9)"></i>
+                            </div>
+                            <span class="vf-act-label">Chia sẻ</span>
+                        </button>
+                        <button class="vf-act-btn" onclick="vfReshuffle()">
+                            <div class="vf-act-circle liq">
+                                <i class="fas fa-shuffle" style="color:rgba(255,255,255,0.75)"></i>
+                            </div>
+                            <span class="vf-act-label">Trộn</span>
+                        </button>
+                        <button class="vf-act-btn" onclick="vfFullscreen(${pos})">
+                            <div class="vf-act-circle liq">
+                                <i class="fas fa-expand" style="color:rgba(255,255,255,0.8)"></i>
+                            </div>
+                            <span class="vf-act-label">Toàn màn</span>
+                        </button>
+                        <button class="vf-act-btn" onclick="toggleVfSpeed()">
+                            <div class="vf-act-circle liq" id="vfSpdCircle-${pos}">
+                                <span style="color:rgba(255,255,255,0.8);font-size:0.72rem;font-family:Lora,serif;font-weight:700;">${vfSpeed}×</span>
+                            </div>
+                            <span class="vf-act-label">Tốc độ</span>
+                        </button>
+                    </div>
+
+                    <!-- Bottom info -->
+                    <div class="vf-info">
+                        <div class="vf-video-num">☸ ${pos+1} / ${vfOrder.length}</div>
+                        <div class="vf-video-title">${v.name}</div>
+                        <div class="vf-prog-wrap" id="vfProgWrap-${pos}"
+                            onclick="vfSeek(${pos},event)">
+                            <div class="vf-prog-bar" id="vfProg-${pos}"></div>
+                        </div>
+                        <div class="vf-time">
+                            <span id="vfTimeCur-${pos}">0:00</span>
+                            <span id="vfTimeTot-${pos}">0:00</span>
+                        </div>
+                    </div>
+                `;
+                scroll.appendChild(card);
+            });
+
+            vfBuilt = true;
+            document.getElementById('vfCounter').textContent = `${vfVideos.length} video`;
+            vfInitObserver();
+            vfUpdateSources(vfPos);
+        }
+
+        // ─── Lazy load video sources ───────────────────────────────────
+        function vfUpdateSources(activePos) {
+            document.querySelectorAll('.vf-card').forEach(card => {
+                const p = parseInt(card.dataset.pos);
+                const video = card.querySelector('.vf-video');
+                if (!video) return;
+                const inRange = Math.abs(p - activePos) <= PRELOAD;
+                if (inRange) {
+                    const wanted = card.dataset.src;
+                    if (video.src !== new URL(wanted, location.href).href) {
+                        video.src = wanted;
+                        video.load();
+                    }
+                    video.preload = p === activePos ? 'auto' : 'metadata';
+                } else {
+                    if (video.src) { video.pause(); video.removeAttribute('src'); video.load(); }
+                }
+            });
+        }
+
+        // ─── IntersectionObserver: autoplay visible card ───────────────
+        function vfInitObserver() {
+            if (vfObserver) vfObserver.disconnect();
+            const scroll = document.getElementById('vfScroll');
+            vfObserver = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    const card = entry.target;
+                    const pos = parseInt(card.dataset.pos);
+                    const video = card.querySelector('.vf-video');
+                    if (!video) return;
+
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
+                        // Đây là card đang xem
+                        vfPos = pos;
+                        vfUpdateSources(pos);
+                        vfUpdatePlaylistHighlight(pos);
+                        document.getElementById('vfCounter').textContent =
+                            `${pos+1} / ${vfOrder.length} video`;
+
+                        video.play().then(() => {
+                            vfSetBigIcon(pos, 'playing');
+                        }).catch(() => {
+                            vfSetBigIcon(pos, 'paused');
+                        });
+
+                        // Bind progress update
+                        video.ontimeupdate = () => vfUpdateProgress(pos, video);
+                    } else {
+                        video.pause();
+                        vfSetBigIcon(pos, 'paused');
+                    }
+                });
+            }, { root: scroll, threshold: 0.65 });
+
+            document.querySelectorAll('.vf-card').forEach(c => vfObserver.observe(c));
+        }
+
+        function vfUpdateProgress(pos, video) {
+            if (!video.duration) return;
+            const pct = (video.currentTime / video.duration) * 100;
+            const bar = document.getElementById(`vfProg-${pos}`);
+            const cur = document.getElementById(`vfTimeCur-${pos}`);
+            const tot = document.getElementById(`vfTimeTot-${pos}`);
+            if (bar) bar.style.width = pct + '%';
+            if (cur) cur.textContent = vfFmtTime(video.currentTime);
+            if (tot) tot.textContent = vfFmtTime(video.duration);
+        }
+
+        function vfFmtTime(s) {
+            if (isNaN(s)) return '0:00';
+            return `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
+        }
+
+        function vfSetBigIcon(pos, state) {
+            const icon = document.getElementById(`vfBigIconI-${pos}`);
+            if (icon) icon.className = state==='playing' ? 'fas fa-pause' : 'fas fa-play';
+        }
+
+        // ─── Tap center: play/pause + ripple ──────────────────────────
+        function vfTapCard(pos, e) {
+            const card = document.querySelector(`.vf-card[data-pos="${pos}"]`);
+            if (!card) return;
+            const video = card.querySelector('.vf-video');
+            if (!video) return;
+
+            // Ripple
+            const rp = document.createElement('div');
+            rp.className = 'vf-ripple';
+            rp.style.left = e.clientX + 'px';
+            rp.style.top = e.clientY + 'px';
+            card.appendChild(rp);
+            setTimeout(() => rp.remove(), 650);
+
+            // Show/hide big icon briefly
+            const tap = document.getElementById(`vfTap-${pos}`);
+            if (tap) {
+                tap.classList.add('showing');
+                clearTimeout(tap._hideTimer);
+                tap._hideTimer = setTimeout(() => tap.classList.remove('showing'), 900);
+            }
+
+            if (video.paused) {
+                video.play().catch(() => {});
+                vfSetBigIcon(pos, 'playing');
+            } else {
+                video.pause();
+                vfSetBigIcon(pos, 'paused');
+            }
+        }
+
+        // ─── Like ──────────────────────────────────────────────────────
+        function vfToggleLike(pos, e) {
+            const src = document.querySelector(`.vf-card[data-pos="${pos}"]`)?.dataset.src;
+            if (!src) return;
+            vfLikes[src] = (vfLikes[src] || 0) === 0 ? 1 : 0;
+            const icon = document.getElementById(`vfLikeIcon-${pos}`);
+            const count = document.getElementById(`vfLikeCount-${pos}`);
+            const liked = vfLikes[src] > 0;
+            if (icon) {
+                icon.style.color = liked ? '#ff3b5c' : 'rgba(255,255,255,0.9)';
+                icon.classList.remove('vf-liked');
+                if (liked) { void icon.offsetWidth; icon.classList.add('vf-liked'); }
+            }
+            if (count) count.textContent = liked ? '❤' : '';
+            playZenSound('tap');
+        }
+
+        // ─── Share ─────────────────────────────────────────────────────
+        function vfShare(pos) {
+            const src = document.querySelector(`.vf-card[data-pos="${pos}"]`)?.dataset.src;
+            const name = vfVideos[vfOrder[pos]]?.name || 'Video Pháp Âm';
+            if (navigator.share) {
+                navigator.share({title: name, text:`🙏 ${name}`, url: location.href}).catch(()=>{});
+            } else {
+                navigator.clipboard?.writeText(location.href)
+                    .then(() => alert('📋 Đã copy link!'))
+                    .catch(() => alert('🙏 Chia sẻ trang này!'));
+            }
+        }
+
+        // ─── Seek ──────────────────────────────────────────────────────
+        function vfSeek(pos, e) {
+            const card = document.querySelector(`.vf-card[data-pos="${pos}"]`);
+            const video = card?.querySelector('.vf-video');
+            const wrap = document.getElementById(`vfProgWrap-${pos}`);
+            if (!video || !wrap || !video.duration) return;
+            const rect = wrap.getBoundingClientRect();
+            video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
+        }
+
+        // ─── Reshuffle ─────────────────────────────────────────────────
+        function vfReshuffle() {
+            if (vfObserver) vfObserver.disconnect();
+            document.querySelectorAll('.vf-card').forEach(c => c.remove());
+            vfBuilt = false; vfPos = 0;
+            vfShuffle();
+            vfBuildCards();
+            const scroll = document.getElementById('vfScroll');
+            scroll.scrollTo({top: 0, behavior: 'instant'});
+            playZenSound('tap');
+        }
+
+        // ─── Playlist sheet ────────────────────────────────────────────
+        function vfBuildPlaylist() {
+            const list = document.getElementById('vfPlaylistItems');
+            list.innerHTML = '';
+            vfOrder.forEach((vidIdx, pos) => {
+                const v = vfVideos[vidIdx];
+                const btn = document.createElement('button');
+                btn.className = `sheet-item${pos === vfPos ? ' active' : ''}`;
+                btn.id = `vfPItem-${pos}`;
+                btn.innerHTML = `
+                    <div class="sheet-item-num">${pos+1}</div>
+                    <div class="sheet-item-info">
+                        <div class="sheet-item-title">${v.name}</div>
+                        <div class="sheet-item-dur">☸ ${v.src}</div>
+                    </div>
+                    ${pos === vfPos ? '<i class="fas fa-volume-high" style="color:var(--gold-base);font-size:0.8rem;flex-shrink:0;"></i>' : ''}
+                `;
+                btn.onclick = () => vfJumpTo(pos);
+                list.appendChild(btn);
+            });
+        }
+
+        function toggleVfPlaylist(force) {
+            const sheet = document.getElementById('vfPlaylistSheet');
+            const bg = document.getElementById('vfPlaylistBg');
+            const open = typeof force === 'boolean' ? force : !sheet.classList.contains('open');
+            if (open) {
+                vfBuildPlaylist();
+                // Scroll active item into view
+                setTimeout(() => {
+                    const active = document.getElementById(`vfPItem-${vfPos}`);
+                    if (active) active.scrollIntoView({block:'center', behavior:'smooth'});
+                }, 300);
+            }
+            sheet.classList.toggle('open', open);
+            bg.style.display = open ? 'block' : 'none';
+        }
+
+        function vfUpdatePlaylistHighlight(pos) {
+            document.querySelectorAll('.sheet-item').forEach((el, i) => {
+                el.classList.toggle('active', i === pos);
+            });
+        }
+
+        function vfJumpTo(pos) {
+            toggleVfPlaylist(false);
+            const card = document.querySelector(`.vf-card[data-pos="${pos}"]`);
+            if (card) {
+                card.scrollIntoView({behavior: 'smooth', block: 'start'});
+                // scrollIntoView trong scroll-snap container
+                const scroll = document.getElementById('vfScroll');
+                scroll.scrollTo({top: pos * window.innerHeight, behavior: 'smooth'});
+            }
+        }
+
+        // ─── Open / Close video feed ───────────────────────────────────
+        async function openVideoFeed() {
+            playZenSound('tap');
+            const page = document.getElementById('videoFeedPage');
+            page.style.display = 'block';
+            requestAnimationFrame(() => requestAnimationFrame(() => page.classList.add('vf-show')));
+
+            // Hide watch button
+            document.getElementById('btnVideoFeed').classList.remove('visible');
+
+            // First time: discover + build
+            if (vfVideos.length === 0) {
+                await discoverVideoFiles();
+                if (vfVideos.length === 0) return; // No videos found
+                vfShuffle();
+            }
+            if (!vfBuilt) {
+                vfBuildCards();
+            }
+
+            // Restore position
+            const scroll = document.getElementById('vfScroll');
+            const targetScroll = Math.max(0, vfPos) * window.innerHeight;
+            scroll.scrollTo({top: targetScroll, behavior: 'instant'});
+        }
+
+        function closeVideoFeed() {
+            // Pause all playing videos
+            document.querySelectorAll('.vf-video').forEach(v => v.pause());
+            const page = document.getElementById('videoFeedPage');
+            page.classList.remove('vf-show');
+            setTimeout(() => { page.style.display = 'none'; }, 680);
+            // Show watch button again
+            document.getElementById('btnVideoFeed').classList.add('visible');
+            // Close playlist if open
+            toggleVfPlaylist(false);
+        }
+
+        // ─── Show/hide watch button based on book state ────────────────
+        const _origOpenBook = openBook;
+        // Override openBook to also show video button
+        window.openBook = function() {
+            _origOpenBook();
+            setTimeout(() => {
+                document.getElementById('btnVideoFeed').classList.add('visible');
+            }, 1200);
+        };
+        window.closeBook = function() {
+            stopCompletely();
+            document.getElementById('glassPlayer').classList.remove('visible');
+            document.getElementById('bookViewport').classList.remove('visible');
+            document.getElementById('btnVideoFeed').classList.remove('visible');
+            setTimeout(() => {
+                document.getElementById('coverPage').classList.remove('hidden-anim');
+                currentPage = 0; updatePageUI();
+            }, 600);
+        };
+
+        // Init
+        document.getElementById('completionScreen').style.display = 'none';
+        document.getElementById('videoFeedPage').style.display = 'none';
+        document.getElementById('btnVideoFeed').style.display = 'flex'; // Hidden via transform initially
+
+
+        // ================================================================
+        // LOCALSTORAGE PERSISTENCE
+        // ================================================================
+        const LS = {
+            K: {
+                PAGE   : 'diep_page',
+                VF_ORDER: 'diep_vf_order',
+                VF_POS  : 'diep_vf_pos',
+                VF_TIME : 'diep_vf_time',
+                LIKES   : 'diep_likes',
+                MUTED   : 'diep_muted',
+                SPEED   : 'diep_speed',
+            },
+            save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+            load(k, d) {
+                try { const v = localStorage.getItem(k); return v !== null ? JSON.parse(v) : d; }
+                catch(e) { return d; }
+            }
+        };
+
+        // ─── Book page memory ─────────────────────────────────────────
+        function saveBookPage() { LS.save(LS.K.PAGE, currentPage); }
+        function loadBookPage() {
+            const p = LS.load(LS.K.PAGE, 0);
+            if (p > 0 && p < totalPages) {
+                currentPage = p; updatePageUI();
+            }
+        }
+        // Gắn vào manualTurnPage (patch sau khi declare)
+        const _origManualTurn = manualTurnPage;
+        manualTurnPage = function(dir) { _origManualTurn(dir); saveBookPage(); };
+
+        function updateReadingProgress() {
+            const bar = document.getElementById('readingProgress');
+            if (bar) bar.style.width = (((currentPage+1) / totalPages) * 100) + '%';
+        }
+        const _origUpdatePageUI = updatePageUI;
+        updatePageUI = function() { _origUpdatePageUI(); updateReadingProgress(); };
+
+        // ─── Video Feed persistence ────────────────────────────────────
+        let vfMuted = LS.load(LS.K.MUTED, false);
+        let vfSpeed = LS.load(LS.K.SPEED, 1);
+        let vfLastTap = 0; // for double-tap like
+
+        function vfSaveState() {
+            LS.save(LS.K.VF_ORDER, vfOrder);
+            LS.save(LS.K.VF_POS, vfPos);
+            LS.save(LS.K.LIKES, vfLikes);
+            // Save time of current video
+            const card = document.querySelector(`.vf-card[data-pos="${vfPos}"]`);
+            const video = card?.querySelector('.vf-video');
+            if (video && video.currentTime > 2) {
+                LS.save(LS.K.VF_TIME, Math.floor(video.currentTime));
+            }
+        }
+
+        function vfLoadState() {
+            const savedOrder  = LS.load(LS.K.VF_ORDER, null);
+            const savedPos    = LS.load(LS.K.VF_POS, 0);
+            const savedLikes  = LS.load(LS.K.LIKES, {});
+            vfLikes = savedLikes;
+
+            if (savedOrder && savedOrder.length === vfVideos.length) {
+                vfOrder = savedOrder; // Restore exact shuffle order
+                vfPos = Math.min(savedPos, vfOrder.length - 1);
+                return true; // Restored
+            }
+            return false; // Need to shuffle
+        }
+
+        // ─── Autosave periodically ─────────────────────────────────────
+        setInterval(() => {
+            if (document.getElementById('videoFeedPage')?.classList.contains('vf-show')) {
+                vfSaveState();
+            }
+        }, 5000);
+
+        // ================================================================
+        // MUTE TOGGLE
+        // ================================================================
+        function vfToggleMute() {
+            vfMuted = !vfMuted;
+            LS.save(LS.K.MUTED, vfMuted);
+            const icon = document.getElementById('vfMuteIcon');
+            if (icon) icon.className = vfMuted ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+            document.querySelectorAll('.vf-video').forEach(v => { v.muted = vfMuted; });
+            haptic('light');
+        }
+
+        // ================================================================
+        // SPEED CONTROL
+        // ================================================================
+        let vfSpeedOpen = false;
+        document.getElementById('vfPlaylistBtn')?.addEventListener('contextmenu', e => {
+            e.preventDefault(); toggleVfSpeed();
+        });
+        // Add speed button to header actions area
+        function toggleVfSpeed() {
+            vfSpeedOpen = !vfSpeedOpen;
+            document.getElementById('vfSpeedBtns').classList.toggle('open', vfSpeedOpen);
+        }
+
+        function vfSetSpeed(s) {
+            vfSpeed = s; LS.save(LS.K.SPEED, s);
+            document.querySelectorAll('.vf-video').forEach(v => { v.playbackRate = s; });
+            document.querySelectorAll('.spd-btn').forEach(btn => {
+                btn.classList.toggle('active', parseFloat(btn.textContent) === s);
+            });
+            const lbl = document.getElementById('vfSpeedLabel');
+            if (lbl) lbl.textContent = s + '×';
+            haptic('light');
+        }
+
+        // ================================================================
+        // HAPTIC FEEDBACK
+        // ================================================================
+        function haptic(type = 'light') {
+            if (navigator.vibrate) {
+                navigator.vibrate(type === 'light' ? 8 : type === 'medium' ? 18 : 35);
+            }
+        }
+
+        // ================================================================
+        // TOAST
+        // ================================================================
+        function showToast(id, msg, duration = 2500) {
+            const t = document.getElementById(id);
+            if (!t) return;
+            if (msg) t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        // ================================================================
+        // DOUBLE-TAP LIKE (TikTok gesture)
+        // ================================================================
+        function vfDoubleTapLike(pos, e) {
+            const card = document.querySelector(`.vf-card[data-pos="${pos}"]`);
+            if (!card) return;
+            // Show floating heart
+            const heart = document.createElement('div');
+            heart.className = 'dt-heart';
+            heart.textContent = '❤';
+            heart.style.left = e.clientX + 'px';
+            heart.style.top  = e.clientY + 'px';
+            card.appendChild(heart);
+            setTimeout(() => heart.remove(), 900);
+            // Toggle like (only add, not remove on double-tap)
+            if (!vfLikes[card.dataset.src]) {
+                vfToggleLike(pos, e);
+            }
+            haptic('medium');
+        }
+
+        // ================================================================
+        // OVERRIDE vfTapCard to support double-tap
+        // ================================================================
+        const _origVfTapCard = vfTapCard;
+        vfTapCard = function(pos, e) {
+            const now = Date.now();
+            const isDouble = (now - vfLastTap) < 300;
+            vfLastTap = now;
+            if (isDouble) {
+                vfDoubleTapLike(pos, e);
+                return;
+            }
+            _origVfTapCard(pos, e);
+        };
+
+        // ================================================================
+        // OVERRIDE vfBuildCards to add spinner + mute/speed per card
+        // ================================================================
+        const _origBuildCards = vfBuildCards;
+        vfBuildCards = function() {
+            _origBuildCards();
+            // Add spinner and bind muted/speed to each video
+            document.querySelectorAll('.vf-card').forEach(card => {
+                const pos = parseInt(card.dataset.pos);
+                const video = card.querySelector('.vf-video');
+                if (!video) return;
+
+                // Spinner overlay
+                const spinner = document.createElement('div');
+                spinner.className = 'vf-spinner'; spinner.id = `vfSpinner-${pos}`;
+                spinner.innerHTML = '<i class="fas fa-dharmachakra"></i>';
+                card.insertBefore(spinner, card.firstChild);
+
+                video.muted = vfMuted;
+                video.playbackRate = vfSpeed;
+
+                video.addEventListener('waiting', () => {
+                    const s = document.getElementById(`vfSpinner-${pos}`);
+                    if (s) s.classList.remove('hidden');
+                });
+                video.addEventListener('playing', () => {
+                    const s = document.getElementById(`vfSpinner-${pos}`);
+                    if (s) s.classList.add('hidden');
+                });
+                video.addEventListener('canplay', () => {
+                    const s = document.getElementById(`vfSpinner-${pos}`);
+                    if (s) s.classList.add('hidden');
+                    video.playbackRate = vfSpeed;
+                    video.muted = vfMuted;
+                });
+            });
+        };
+
+        // ================================================================
+        // OVERRIDE openVideoFeed - restore localStorage state
+        // ================================================================
+        const _origOpenFeed = openVideoFeed;
+        openVideoFeed = async function() {
+            playZenSound('tap');
+            const page = document.getElementById('videoFeedPage');
+            page.style.display = 'block';
+            requestAnimationFrame(() => requestAnimationFrame(() => page.classList.add('vf-show')));
+            document.getElementById('btnVideoFeed').classList.remove('visible');
+
+            // Update mute icon
+            const muteIcon = document.getElementById('vfMuteIcon');
+            if (muteIcon) muteIcon.className = vfMuted ? 'fas fa-volume-xmark' : 'fas fa-volume-high';
+
+            if (vfVideos.length === 0) {
+                await discoverVideoFiles();
+                if (vfVideos.length === 0) return;
+
+                // Try to restore from localStorage
+                const restored = vfLoadState();
+                if (!restored) vfShuffle();
+            }
+
+            if (!vfBuilt) vfBuildCards();
+
+            // Scroll to remembered position instantly
+            const scroll = document.getElementById('vfScroll');
+            const targetPos = Math.max(0, vfPos);
+            scroll.scrollTo({ top: targetPos * window.innerHeight, behavior: 'instant' });
+
+            // Restore video time after brief delay
+            const savedTime = LS.load(LS.K.VF_TIME, 0);
+            if (savedTime > 2) {
+                setTimeout(() => {
+                    const card = document.querySelector(`.vf-card[data-pos="${targetPos}"]`);
+                    const video = card?.querySelector('.vf-video');
+                    if (video && video.readyState >= 1 && savedTime < video.duration) {
+                        video.currentTime = savedTime;
+                        showToast('vfRestoreToast', `▶ Tiếp tục từ ${vfFmtTime(savedTime)}`, 2500);
+                    }
+                }, 800);
+            } else if (vfPos > 0) {
+                showToast('vfRestoreToast', `▶ Tiếp tục từ Video ${vfPos + 1}`, 2200);
+            }
+        };
+
+        // ================================================================
+        // OVERRIDE closeVideoFeed - save state before closing
+        // ================================================================
+        const _origCloseFeed = closeVideoFeed;
+        closeVideoFeed = function() {
+            vfSaveState();
+            document.querySelectorAll('.vf-video').forEach(v => v.pause());
+            const page = document.getElementById('videoFeedPage');
+            page.classList.remove('vf-show');
+            setTimeout(() => { page.style.display = 'none'; }, 680);
+            document.getElementById('btnVideoFeed').classList.add('visible');
+            toggleVfPlaylist(false);
+        };
+
+        // ================================================================
+        // INIT: restore book page on load
+        // ================================================================
+        setTimeout(() => {
+            loadBookPage();
+            updateReadingProgress();
+            // Speed buttons initial state
+            vfSetSpeed(vfSpeed);
+        }, 100);
+
+        // ================================================================
+        // SAVE on page hide (mobile background/tab close)
+        // ================================================================
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) vfSaveState();
+        });
+        window.addEventListener('pagehide', () => vfSaveState());
+
+        // Fullscreen
+        function vfFullscreen(pos) {
+            const card = document.querySelector(`.vf-card[data-pos="${pos}"]`);
+            const video = card?.querySelector('.vf-video');
+            if (!video) return;
+            const el = video.requestFullscreen || video.webkitRequestFullscreen || video.mozRequestFullScreen;
+            if (el) el.call(video);
+            haptic('light');
+        }
+
+        window.onbeforeunload = () => {
+            stopCompletely();
+            document.querySelectorAll('.vf-video').forEach(v => v.pause());
+        };
+
+        initBook();
+    </script>
+</body>
+</html>
+
+
